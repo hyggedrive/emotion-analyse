@@ -1,0 +1,34 @@
+
+
+from keras.models import Model
+from keras.layers import Input
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+
+
+def cnn_build(input_shape=(64, 64, 3), num_classes=8):
+
+    inputs = Input(shape=input_shape)
+
+    x = Conv2D(32, (5, 5), activation='relu')(inputs)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Conv2D(32, (5, 5), activation='relu')(x)  # 滤波通道决定特征种类
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Conv2D(64, (3, 3), activation='relu')(x)  # 滤波通道决定特征种类
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Conv2D(64, (3, 3), activation='relu')(x)
+    x = MaxPooling2D(pool_size=(2, 2))(x)
+    x = Flatten()(x)
+    x = Dense(128, activation='relu')(x)
+
+    outputs = Dense(num_classes, activation='softmax')(x)#num_classes
+
+    model = Model(inputs=inputs, outputs=outputs)
+    return model
+
+
+
+model =  cnn_build()
+model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+print(model.summary())
+
+
