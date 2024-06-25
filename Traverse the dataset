@@ -3,7 +3,7 @@ import os
 data_dir = './dataset/train'
 
 with open(os.path.join(data_dir, 'images_train.txt'), 'w') as f:
-
+#with open(os.path.join(data_dir, 'images_text.txt'), 'w') as f:
     for filename in os.listdir(data_dir):
 
         if filename.lower().endswith(('.jpg')):
