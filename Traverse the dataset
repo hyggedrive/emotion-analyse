@@ -1,6 +1,5 @@
 import os
 
-
 def generate_image_paths_and_labels(data_dir):
     image_paths_and_labels = []
 
