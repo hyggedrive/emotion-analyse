@@ -17,7 +17,11 @@ def generate_image_paths_and_labels(data_dir):
 
     return image_paths_and_labels
 
-
-
-data_directory = './dataset/train'  # 替换为你的图片目录路径
+data_directory = './dataset/train'  
 image_data = generate_image_paths_and_labels(data_directory)
+
+output_file_path = './image_train.txt'  
+with open(output_file_path, 'w') as output_file:
+    for image_path, label in image_data:
+        output_file.write(f'{image_path},{label}\n')
+
