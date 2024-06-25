@@ -1,0 +1,30 @@
+import os
+from PIL import Image
+from torch.utils.data import Dataset
+
+
+class Dataset_build(Dataset):
+    def __init__(self, data_dir, transforms=None):
+        self.data_info = self.get_img_info(data_dir)#存所有图片的路径和标签 在loader中通过item读取样本
+        self.transforms = transforms
+
+    def __getitem__(self, item):
+        path_img, label = self.data_info[item]
+        image = Image.open(path_img).convert('RGB')#0-255
+        if self.transforms is not None:
+            image = self.transforms(image)
+
+        return image, label#返回样本和标签
+
+    def __len__(self):
+        return len(self.data_info)#返回所有样本的长度
+
+    @staticmethod
+    def get_img_info(data_dir):
+        path_dir = os.path.join(data_dir, 'images_train.txt')
+        data_info = []#用来存储路径和标签
+        with open(path_dir) as file:
+            lines = file.readlines()
+            for line in lines:
+                data_info.append(line.strip('\n').split(' '))#添加路径与标签
+        return data_info
