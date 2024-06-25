@@ -1,11 +1,23 @@
 import os
 
-data_dir = './dataset/train'
 
-with open(os.path.join(data_dir, 'images_train.txt'), 'w') as f:
-#with open(os.path.join(data_dir, 'images_text.txt'), 'w') as f:
+def generate_image_paths_and_labels(data_dir):
+    image_paths_and_labels = []
+
+
     for filename in os.listdir(data_dir):
 
-        if filename.lower().endswith(('.jpg')):
+        if filename.lower().endswith('.jpg'):
 
-            f.write(filename + '\n')
+            image_path = os.path.join(data_dir, filename)
+
+            label = os.path.splitext(filename)[0].split('_')[0]
+
+            image_paths_and_labels.append((image_path, label))
+
+    return image_paths_and_labels
+
+
+
+data_directory = './dataset/train'  # 替换为你的图片目录路径
+image_data = generate_image_paths_and_labels(data_directory)
