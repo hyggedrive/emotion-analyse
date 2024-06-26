@@ -1,12 +1,16 @@
 import os
+import torch
+import torchvision
 from PIL import Image
+from torchvision import transforms
 from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
+from torch.utils.tensorboard import SummaryWriter
 
 class Dataset_build(Dataset):
     def __init__(self, data_dir, transforms=None):
         self.data_info = self.get_img_info(data_dir)#存所有图片的路径和标签 在loader中通过item读取样本
-        self.transforms = transforms#先不做处理
+        self.transforms = transforms
 
     def __getitem__(self, item):#通过item访问数据
         path_img, label = self.data_info[item]
@@ -19,11 +23,21 @@ class Dataset_build(Dataset):
     def __len__(self):
         return len(self.data_info)#返回所有样本的长度
 
-    def get_img_info(data_dir):
-        path_dir = os.path.join(data_dir, './image_train.txt')
+    def get_img_info(self , data_dir):
+        path_dir = os.path.join(data_dir, 'image_train.txt')
         data_info = []#开个元组用来存储路径和标签
         with open(path_dir) as file:
             lines = file.readlines()
             for line in lines:
                 data_info.append(line.strip('\n').split(' '))#添加路径与标签
         return data_info
+
+# 定义转换
+train_transforms = transforms.Compose([transforms.RandomResizedCrop(224),transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+val_transforms = transforms.Compose([transforms.Resize(256),transforms.CenterCrop(224),transforms.ToTensor(),transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
+
+train_dataset = Dataset_build(data_dir='.', transforms=train_transforms)
+val_dataset = Dataset_build(data_dir='.', transforms=val_transforms)
+
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
