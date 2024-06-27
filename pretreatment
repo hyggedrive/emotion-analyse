@@ -9,29 +9,37 @@ from torch.utils.tensorboard import SummaryWriter
 
 class Dataset_build(Dataset):
     def __init__(self, data_dir, transforms=None):
-        self.data_info = self.get_img_info(data_dir)#存所有图片的路径和标签 在loader中通过item读取样本
+        self.data_info = self.get_img_info(data_dir)  # 存所有图片的路径和标签 在loader中通过item读取样本
         self.transforms = transforms
 
-    def __getitem__(self, item):#通过item访问数据
-        path_img, label = self.data_info[item]
-        image = Image.open(path_img).convert('RGB')#0-255
+        # 创建一个字典，将字符串标签映射到整数
+        self.label_to_index = {label: index for index, label in enumerate(set(label for _, label in self.data_info))}
+
+    def __getitem__(self, item):  # 通过item访问数据
+        path_img, str_label = self.data_info[item]
+        image = Image.open(path_img).convert('RGB')  # 0-255
         if self.transforms is not None:
             image = self.transforms(image)
 
-        return image, label#返回样本和标签
+        # 将字符串标签转换为整数标签
+        index_label = self.label_to_index[str_label]
+        # 将整数标签转换为张量
+        label = torch.tensor(index_label, dtype=torch.long)
+
+        return image, label  # 返回样本和标签
 
     def __len__(self):
-        return len(self.data_info)#返回所有样本的长度
+        return len(self.data_info)  # 返回所有样本的长度
 
-    def get_img_info(self , data_dir):
+    def get_img_info(self, data_dir):
         path_dir = os.path.join(data_dir, 'image_train.txt')
-        data_info = []#开个元组用来存储路径和标签
+        data_info = []  # 开个元组用来存储路径和标签
         with open(path_dir) as file:
             lines = file.readlines()
             for line in lines:
-                data_info.append(line.strip('\n').split(' '))#添加路径与标签
+                path_img, str_label = line.strip('\n').split(',')  # 添加路径与标签
+                data_info.append((path_img, str_label))
         return data_info
-
 # 定义转换
 train_transforms = transforms.Compose([transforms.RandomResizedCrop(224),transforms.RandomHorizontalFlip(),transforms.ToTensor(),transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 val_transforms = transforms.Compose([transforms.Resize(256),transforms.CenterCrop(224),transforms.ToTensor(),transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
@@ -39,5 +47,16 @@ val_transforms = transforms.Compose([transforms.Resize(256),transforms.CenterCro
 train_dataset = Dataset_build(data_dir='.', transforms=train_transforms)
 val_dataset = Dataset_build(data_dir='.', transforms=val_transforms)
 
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=False)#32大小的批次  包含两个张量
 val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+
+#检查dataset dataloader是否正常
+print(len(train_dataset))
+print(len(train_loader))
+print(train_loader)
+
+for i, (images, labels) in enumerate(train_loader):
+    print(f"Batch {i+1}:")
+    print(f"Images Shape: {images.shape}")
+    print(f"Labels Shape: {labels.shape}")
+
