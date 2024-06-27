@@ -1,8 +1,8 @@
 八个不同标签的数据集
 1. 数据集如何预处理？(IASP)
 
-- dataset->dateloader
-- init  and  len  and  getitem
+- dataset进行数据封装导入（__getitem__返回图像路径与label）
+- dataloader对数据进行分批 从dataset中加载数据
 
 2. 使用CNN进行语义提取
 
